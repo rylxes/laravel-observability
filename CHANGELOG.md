@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.0.1] - 2026-02-11nn### Addedn- re-arranged project filesnn
+
 All notable changes to `laravel-observability` will be documented in this file.
 
 ## [1.0.0] - 2024-01-01
