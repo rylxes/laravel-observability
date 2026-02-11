@@ -1,0 +1,80 @@
+{
+    "name": "rylxes/laravel-observability",
+    "description": "Production-grade observability and APM plugin for Laravel applications with OpenTelemetry, Prometheus, and AI-powered anomaly detection",
+    "keywords": [
+        "laravel",
+        "observability",
+        "apm",
+        "monitoring",
+        "tracing",
+        "opentelemetry",
+        "prometheus",
+        "performance",
+        "profiling",
+        "rylxes"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/rylxes/laravel-observability",
+    "authors": [
+        {
+            "name": "Sherriff Agboola",
+            "email": "rylxes@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/rylxes/laravel-observability/issues",
+        "source": "https://github.com/rylxes/laravel-observability",
+        "email": "rylxes@gmail.com"
+    },
+    "require": {
+        "php": "^8.1|^8.2|^8.3",
+        "illuminate/support": "^10.0|^11.0",
+        "illuminate/database": "^10.0|^11.0",
+        "illuminate/http": "^10.0|^11.0",
+        "open-telemetry/opentelemetry": "^1.0",
+        "promphp/prometheus_client_php": "^2.7",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "orchestra/testbench": "^8.0|^9.0",
+        "filament/filament": "^3.0",
+        "mockery/mockery": "^1.5"
+    },
+    "suggest": {
+        "filament/filament": "Required for the built-in dashboard UI (^3.0)",
+        "predis/predis": "Required for Redis cache driver (^2.0)",
+        "ext-redis": "Native PHP Redis extension for better performance"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rylxes\\Observability\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rylxes\\Observability\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rylxes\\Observability\\ObservabilityServiceProvider"
+            ],
+            "aliases": {
+                "Observability": "Rylxes\\Observability\\Facades\\Observability"
+            }
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
