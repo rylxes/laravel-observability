@@ -336,36 +336,9 @@ The plugin creates 4 tables (with configurable prefix):
 
 ---
 
-## 💰 Monetization (SaaS Model)
-
-### Free Tier (Open Source)
-- Core tracing & monitoring
-- Local dashboard
-- 7-day data retention
-
-### Pro Tier ($29-99/mo)
-- Cloud storage (unlimited retention)
-- Advanced AI anomaly detection
-- Multi-project support
-- Email reports
-
-### Enterprise ($499+/mo)
-- On-premise deployment
-- Custom integrations
-- SLA monitoring
-- Dedicated support
-
----
-
 ## 🤝 Contributing
 
-Contributions welcome! Please submit PRs to the `develop` branch.
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+Contributions welcome! Please see [CONTRIBUTING.md](https://github.com/rylxes/laravel-observability/blob/main/docs/CONTRIBUTING.md) for details.
 
 ---
 
@@ -377,7 +350,7 @@ MIT License. See [LICENSE](LICENSE) file.
 
 ## 🙏 Credits
 
-Built with ❤️ for the Laravel community.
+Built with ❤️ for the Laravel community by [Sherriff Agboola](https://github.com/rylxes).
 
 - OpenTelemetry PHP: https://github.com/open-telemetry/opentelemetry-php
 - Prometheus PHP: https://github.com/PromPHP/prometheus_client_php
@@ -388,19 +361,7 @@ Built with ❤️ for the Laravel community.
 
 - **Issues**: [GitHub Issues](https://github.com/rylxes/laravel-observability/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/rylxes/laravel-observability/discussions)
-- **Email**: support@rylxes
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Filament dashboard widgets
-- [ ] Jaeger exporter implementation
-- [ ] Grafana dashboard templates
-- [ ] Real-time WebSocket updates
-- [ ] Custom metric tracking API
-- [ ] Multi-tenancy support
-- [ ] Cloud SaaS platform
+- **Email**: rylxes@gmail.com
 
 ---
 
