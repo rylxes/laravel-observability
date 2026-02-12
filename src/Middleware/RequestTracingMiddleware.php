@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Collectors\DatabaseQueryCollector;
+use Rylxes\Observability\Jobs\StoreTraceJob;
+use Rylxes\Observability\Events\NewTraceRecorded;
 
 class RequestTracingMiddleware
 {
@@ -121,9 +123,22 @@ class RequestTracingMiddleware
 
         // Save to database or queue
         if (config('observability.queue.enabled')) {
-            // TODO: Dispatch job to save trace
+            StoreTraceJob::dispatch($trace);
         } else {
             RequestTrace::create($trace);
+        }
+
+        // Broadcast real-time event
+        if (config('observability.broadcasting.enabled')) {
+            event(new NewTraceRecorded(
+                traceId: $trace['trace_id'],
+                method: $trace['method'],
+                url: $trace['url'],
+                statusCode: $trace['status_code'],
+                durationMs: $trace['duration_ms'],
+                queryCount: $trace['query_count'],
+                routeName: $trace['route_name'] ?? null,
+            ));
         }
     }
 

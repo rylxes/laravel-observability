@@ -5,6 +5,7 @@ namespace Rylxes\Observability\Analyzers;
 use Illuminate\Support\Facades\DB;
 use Rylxes\Observability\Models\QueryLog;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Events\AlertTriggered;
 
 class SlowQueryDetector
 {
@@ -133,7 +134,7 @@ class SlowQueryDetector
                 continue;
             }
 
-            Alert::create([
+            $alert = Alert::create([
                 'alert_type' => 'slow_query',
                 'severity' => 'warning',
                 'title' => 'Critical Slow Query Detected',
@@ -146,6 +147,19 @@ class SlowQueryDetector
                 ],
                 'fingerprint' => $fingerprint,
             ]);
+
+            // Broadcast real-time event
+            if (config('observability.broadcasting.enabled')) {
+                event(new AlertTriggered(
+                    alertId: $alert->id,
+                    alertType: $alert->alert_type,
+                    severity: $alert->severity,
+                    title: $alert->title,
+                    description: $alert->description,
+                    source: $alert->source,
+                    context: $alert->context,
+                ));
+            }
         }
     }
 

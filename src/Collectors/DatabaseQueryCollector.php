@@ -6,6 +6,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Rylxes\Observability\Models\QueryLog;
+use Rylxes\Observability\Jobs\StoreQueryLogJob;
 
 class DatabaseQueryCollector
 {
@@ -137,7 +138,7 @@ class DatabaseQueryCollector
 
             // Save to database or queue
             if (config('observability.queue.enabled')) {
-                // TODO: Dispatch job
+                StoreQueryLogJob::dispatch($data);
             } else {
                 QueryLog::create($data);
             }

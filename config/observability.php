@@ -286,4 +286,18 @@ return [
         'middleware' => ['web', 'auth'],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Broadcasting (Real-time Updates)
+    |--------------------------------------------------------------------------
+    |
+    | Configure real-time broadcasting of observability events via
+    | Laravel Broadcasting. Works with any driver (Reverb, Pusher, etc.).
+    |
+    */
+    'broadcasting' => [
+        'enabled' => env('OBSERVABILITY_BROADCASTING_ENABLED', false),
+        'channel' => env('OBSERVABILITY_BROADCAST_CHANNEL', 'observability'),
+    ],
+
 ];

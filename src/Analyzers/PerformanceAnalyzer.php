@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Models\PerformanceMetric;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Events\PerformanceThresholdExceeded;
 
 class PerformanceAnalyzer
 {
@@ -206,6 +207,18 @@ class PerformanceAnalyzer
                 'message' => 'Routes with high query count (possible N+1)',
                 'data' => $queryHeavy->pluck('route_name')->toArray(),
             ];
+        }
+
+        // Broadcast real-time events for each bottleneck
+        if (config('observability.broadcasting.enabled') && !empty($bottlenecks)) {
+            foreach ($bottlenecks as $bottleneck) {
+                event(new PerformanceThresholdExceeded(
+                    type: $bottleneck['type'],
+                    severity: $bottleneck['severity'],
+                    message: $bottleneck['message'],
+                    routes: $bottleneck['data'],
+                ));
+            }
         }
 
         return $bottlenecks;

@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Rylxes\Observability\Models\PerformanceMetric;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Events\AnomalyDetected;
 
 class AnomalyDetector
 {
@@ -241,6 +242,18 @@ class AnomalyDetector
             'context' => $anomaly,
             'fingerprint' => $fingerprint,
         ]);
+
+        // Broadcast real-time event
+        if (config('observability.broadcasting.enabled')) {
+            event(new AnomalyDetected(
+                metricType: $anomaly['metric_type'],
+                metricName: $anomaly['metric_name'],
+                value: $anomaly['value'],
+                baseline: $anomaly['baseline'],
+                zScore: $anomaly['z_score'],
+                deviationPercent: $anomaly['deviation_percent'],
+            ));
+        }
     }
 
     /**
