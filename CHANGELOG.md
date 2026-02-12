@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.0] - 2026-02-12nn### Changedn- Queue-based background processing (StoreTraceJob, StoreQueryLogJob), Real-time WebSocket broadcasting events, Filament dashboard with 5 widgets and 3 resources, Comprehensive unit tests (153 tests)nn### Fixedn- Wired queue dispatch and broadcast events into existing collectors and analyzersnn
+
 ## [1.0.1] - 2026-02-11nn### Addedn- re-arranged project filesnn
 
 All notable changes to `laravel-observability` will be documented in this file.
