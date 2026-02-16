@@ -30,12 +30,27 @@ class InstallCommand extends Command
 
         // Add middleware instructions
         $this->newLine();
-        $this->warn('IMPORTANT: Add the middleware to your app/Http/Kernel.php:');
-        $this->line('');
-        $this->line("protected \$middleware = [");
-        $this->line("    // ... other middleware");
-        $this->line("    \\YourVendor\\Observability\\Middleware\\RequestTracingMiddleware::class,");
-        $this->line("];");
+        $this->warn('IMPORTANT: If you want to manually register the middleware (instead of auto-registration):');
+
+        $laravelVersion = (int) app()->version();
+
+        if ($laravelVersion >= 11) {
+            $this->line('');
+            $this->line('Add to your bootstrap/app.php:');
+            $this->line('');
+            $this->line('->withMiddleware(function (Middleware $middleware) {');
+            $this->line('    $middleware->append(\\Rylxes\\Observability\\Middleware\\RequestTracingMiddleware::class);');
+            $this->line('})');
+        } else {
+            $this->line('');
+            $this->line('Add to your app/Http/Kernel.php:');
+            $this->line('');
+            $this->line('protected $middleware = [');
+            $this->line('    // ... other middleware');
+            $this->line('    \\Rylxes\\Observability\\Middleware\\RequestTracingMiddleware::class,');
+            $this->line('];');
+        }
+
         $this->newLine();
 
         // Environment variables

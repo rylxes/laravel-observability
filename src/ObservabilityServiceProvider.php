@@ -93,9 +93,8 @@ class ObservabilityServiceProvider extends ServiceProvider
 
         // Auto-register middleware globally if enabled
         if (config('observability.enabled') && config('observability.tracing.enabled')) {
-            // For Laravel 11+ - middleware is auto-registered via Kernel
-            // For Laravel 10 and below, you would use:
-            // $router->pushMiddlewareToGroup('web', RequestTracingMiddleware::class);
+            $router->pushMiddlewareToGroup('web', RequestTracingMiddleware::class);
+            $router->pushMiddlewareToGroup('api', RequestTracingMiddleware::class);
         }
     }
 
