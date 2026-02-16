@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.3] - 2026-02-16nn### Addedn- different authentication methods acceptednn
+
 ## [1.1.1] - 2026-02-16nn### Addedn- added compactibility to more laravel versionsnn
 
 ## [1.1.0] - 2026-02-12nn### Changedn- Queue-based background processing (StoreTraceJob, StoreQueryLogJob), Real-time WebSocket broadcasting events, Filament dashboard with 5 widgets and 3 resources, Comprehensive unit tests (153 tests)nn### Fixedn- Wired queue dispatch and broadcast events into existing collectors and analyzersnn
