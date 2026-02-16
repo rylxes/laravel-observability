@@ -45,7 +45,7 @@
         "mockery/mockery": "^1.5"
     },
     "suggest": {
-        "filament/filament": "Required for the built-in dashboard UI (^3.0)",
+        "filament/filament": "Optional for Filament resources/widgets integration (^3.0)",
         "predis/predis": "Required for Redis cache driver (^2.0)",
         "ext-redis": "Native PHP Redis extension for better performance"
     },

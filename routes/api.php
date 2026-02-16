@@ -5,6 +5,7 @@ use Rylxes\Observability\Exporters\PrometheusExporter;
 use Rylxes\Observability\Analyzers\PerformanceAnalyzer;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Support\DashboardRouteConfig;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,21 +13,13 @@ use Rylxes\Observability\Models\Alert;
 |--------------------------------------------------------------------------
 */
 
-// Filter guards to only include those actually defined in config/auth.php
-$configuredGuards = array_keys(config('auth.guards', []));
-$desiredGuards = config('observability.dashboard.guards', ['web', 'sanctum']);
-$availableGuards = array_intersect($desiredGuards, $configuredGuards);
-
-// Fallback to 'web' if no guards are available
-if (empty($availableGuards)) {
-    $availableGuards = ['web'];
+$apiMiddleware = ['web'];
+if (DashboardRouteConfig::authEnabled()) {
+    $apiMiddleware[] = 'auth:' . implode(',', DashboardRouteConfig::availableGuards());
 }
 
 Route::prefix('api/observability')
-    ->middleware([
-        'web',
-        'auth:' . implode(',', $availableGuards)
-    ])
+    ->middleware(array_values(array_unique($apiMiddleware)))
     ->group(function () {
 
         // Prometheus metrics endpoint
@@ -37,7 +30,9 @@ Route::prefix('api/observability')
 
         // Performance dashboard data
         Route::get('/dashboard', function (PerformanceAnalyzer $analyzer) {
-            return response()->json($analyzer->analyze(1));
+            $days = max(1, min((int) request()->query('days', 1), 30));
+
+            return response()->json($analyzer->analyze($days));
         })->name('observability.dashboard');
 
         // Recent traces

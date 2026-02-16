@@ -59,11 +59,20 @@ class ObservabilityServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations' => database_path('migrations'),
         ], 'observability-migrations');
 
+        // Publish views
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/observability'),
+        ], 'observability-views');
+
         // Load migrations
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
+        // Load package views
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'observability');
+
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
         // Register middleware
         $this->registerMiddleware();

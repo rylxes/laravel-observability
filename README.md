@@ -21,7 +21,7 @@ A lightweight, database-agnostic alternative to full APM tools, optimized specif
 - 📈 **OpenTelemetry Export** - OTLP protocol support for distributed tracing
 - 📊 **Prometheus Metrics** - `/metrics` endpoint for Prometheus scraping
 - 🔔 **Smart Alerting** - Slack/Telegram notifications with throttling and deduplication
-- 🎨 **Dashboard Ready** - API endpoints for building custom dashboards (Filament support planned)
+- 🎨 **Built-In Dashboard UI + API** - Authenticated web dashboard at `/admin/observability` plus API endpoints for custom implementations
 - 🗃️ **Database Agnostic** - Works with MySQL, PostgreSQL, SQLite, SQL Server
 
 ---
@@ -114,6 +114,16 @@ php artisan observability:analyze --days=7 --notify
 php artisan observability:prune --force
 ```
 
+### Web Dashboard (Authenticated)
+
+By default, the package includes a web dashboard at:
+
+```text
+/admin/observability
+```
+
+It uses your app's configured auth guards (`observability.dashboard.guards`), so it works with your existing login/session setup while still exposing the API for internal tools.
+
 ### API Endpoints
 
 All endpoints are prefixed with `/api/observability`:
@@ -121,7 +131,7 @@ All endpoints are prefixed with `/api/observability`:
 | Endpoint | Description |
 |----------|-------------|
 | `GET /metrics` | Prometheus metrics (text format) |
-| `GET /dashboard` | Performance dashboard data (JSON) |
+| `GET /dashboard` | Performance dashboard data (JSON, supports `?days=1..30`) |
 | `GET /traces` | Recent request traces |
 | `GET /traces/{traceId}` | Single trace detail |
 | `GET /alerts` | Recent alerts |
@@ -198,6 +208,17 @@ Then configure the connection in `config/database.php`.
     'queries_days' => 7,
     'metrics_days' => 30,
     'alerts_days' => 30,
+],
+```
+
+### Dashboard UI
+```php
+'dashboard' => [
+    'enabled' => true,
+    'route_prefix' => 'admin/observability',
+    'middleware' => ['web'],
+    'guards' => ['web', 'sanctum'],
+    'refresh_interval_seconds' => 30,
 ],
 ```
 
@@ -313,6 +334,20 @@ Run tests:
 ```bash
 composer test
 ```
+
+### Local Development Loop (Deploy Once)
+
+```bash
+cd ..
+composer create-project laravel/laravel observability-sandbox
+cd observability-sandbox
+composer config repositories.observability '{"type":"path","url":"../Observability Plugin","options":{"symlink":true}}'
+composer require rylxes/laravel-observability:@dev
+php artisan observability:install
+php artisan migrate
+```
+
+This lets you test package changes locally through `/admin/observability`, then ship one release after validation.
 
 With coverage:
 ```bash

@@ -3,7 +3,6 @@
 namespace Rylxes\Observability\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 
 class InstallCommand extends Command
 {
@@ -72,9 +71,16 @@ class InstallCommand extends Command
         $this->line('');
         $this->line('# Optional: Prometheus Export');
         $this->line('OBSERVABILITY_PROMETHEUS_ENABLED=false');
+        $this->line('');
+        $this->line('# Optional: Dashboard UI');
+        $this->line('OBSERVABILITY_DASHBOARD_PREFIX=admin/observability');
+        $this->line('OBSERVABILITY_DASHBOARD_REFRESH_INTERVAL=30');
         $this->newLine();
 
         $this->info('✓ Installation complete!');
+        $dashboardPath = trim((string) config('observability.dashboard.route_prefix', 'admin/observability'), '/');
+        $dashboardPath = $dashboardPath === '' ? '/' : '/' . $dashboardPath;
+        $this->info("🎛 Visit {$dashboardPath} for the dashboard UI (authenticated)");
         $this->info('📊 Visit /api/observability/metrics to view your metrics');
 
         return self::SUCCESS;

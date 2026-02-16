@@ -277,13 +277,18 @@ return [
     | Dashboard
     |--------------------------------------------------------------------------
     |
-    | Configure the built-in dashboard (requires Filament).
+    | Configure the built-in observability dashboard UI.
     |
     */
     'dashboard' => [
         'enabled' => env('OBSERVABILITY_DASHBOARD_ENABLED', true),
-        'route_prefix' => env('OBSERVABILITY_DASHBOARD_PREFIX', 'observability'),
+        'route_prefix' => env('OBSERVABILITY_DASHBOARD_PREFIX', 'admin/observability'),
         'middleware' => ['web'],
+        'refresh_interval_seconds' => env('OBSERVABILITY_DASHBOARD_REFRESH_INTERVAL', 30),
+
+        // Set to false to disable authentication on the dashboard and API routes.
+        // Useful for local development or API-only apps without web login routes.
+        'auth_enabled' => env('OBSERVABILITY_DASHBOARD_AUTH', true),
 
         // Authentication guards to check (in order)
         // Only guards that exist in config/auth.php will be used
