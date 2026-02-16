@@ -13,14 +13,17 @@ use Rylxes\Observability\Models\Alert;
 */
 
 Route::prefix('api/observability')
-    ->middleware(config('observability.dashboard.middleware', ['web', 'auth']))
+    ->middleware([
+        'web',
+        'auth:' . implode(',', config('observability.dashboard.guards', ['web', 'sanctum', 'api']))
+    ])
     ->group(function () {
 
         // Prometheus metrics endpoint
         Route::get('/metrics', function (PrometheusExporter $exporter) {
             return response($exporter->export())
                 ->header('Content-Type', 'text/plain; version=0.0.4');
-        })->name('observability.metrics');
+        })->name('observability.metrics')->withoutMiddleware('auth');
 
         // Performance dashboard data
         Route::get('/dashboard', function (PerformanceAnalyzer $analyzer) {

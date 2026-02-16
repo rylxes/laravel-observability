@@ -283,7 +283,12 @@ return [
     'dashboard' => [
         'enabled' => env('OBSERVABILITY_DASHBOARD_ENABLED', true),
         'route_prefix' => env('OBSERVABILITY_DASHBOARD_PREFIX', 'observability'),
-        'middleware' => ['web', 'auth'],
+        'middleware' => ['web'],
+
+        // Authentication guards to check (in order)
+        // Supports multiple guards: web sessions, sanctum tokens, passport, api, etc.
+        // Laravel will try each guard until one authenticates
+        'guards' => ['web', 'sanctum', 'api'],
     ],
 
     /*
