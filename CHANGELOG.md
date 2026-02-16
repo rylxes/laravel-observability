@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.2.0] - 2026-02-16nn### Changedn- Laravel 10, 11, 12 compatibility; Multi-guard authentication (web, sanctum, passport, custom guards); Automatic guard validationnn### Fixedn- Multi-guard authentication support, improved middleware auto-registration, version-aware install command, guard existence validationnn
+
 ## [1.1.4] - 2026-02-16nn### Addedn- different authentication methods acceptednn
 
 ## [1.1.3] - 2026-02-16nn### Addedn- different authentication methods acceptednn
