@@ -286,9 +286,10 @@ return [
         'middleware' => ['web'],
 
         // Authentication guards to check (in order)
-        // Supports multiple guards: web sessions, sanctum tokens, passport, api, etc.
-        // Laravel will try each guard until one authenticates
-        'guards' => ['web', 'sanctum', 'api'],
+        // Only guards that exist in config/auth.php will be used
+        // Common guards: 'web' (sessions), 'sanctum' (API tokens), 'api' (token auth)
+        // Add 'api' or other custom guards if your app defines them
+        'guards' => ['web', 'sanctum'],
     ],
 
     /*

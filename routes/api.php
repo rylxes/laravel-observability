@@ -12,10 +12,20 @@ use Rylxes\Observability\Models\Alert;
 |--------------------------------------------------------------------------
 */
 
+// Filter guards to only include those actually defined in config/auth.php
+$configuredGuards = array_keys(config('auth.guards', []));
+$desiredGuards = config('observability.dashboard.guards', ['web', 'sanctum']);
+$availableGuards = array_intersect($desiredGuards, $configuredGuards);
+
+// Fallback to 'web' if no guards are available
+if (empty($availableGuards)) {
+    $availableGuards = ['web'];
+}
+
 Route::prefix('api/observability')
     ->middleware([
         'web',
-        'auth:' . implode(',', config('observability.dashboard.guards', ['web', 'sanctum', 'api']))
+        'auth:' . implode(',', $availableGuards)
     ])
     ->group(function () {
 
