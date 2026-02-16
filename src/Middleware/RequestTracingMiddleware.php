@@ -115,7 +115,7 @@ class RequestTracingMiddleware
 
         // Add metadata
         $trace['metadata'] = [
-            'session_id' => $request->session()?->getId(),
+            'session_id' => $request->hasSession() ? $request->session()->getId() : null,
             'referer' => $request->header('referer'),
             'is_ajax' => $request->ajax(),
             'is_json' => $request->expectsJson(),
