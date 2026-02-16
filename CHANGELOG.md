@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.4] - 2026-02-16nn### Addedn- different authentication methods acceptednn
+
 ## [1.1.3] - 2026-02-16nn### Addedn- different authentication methods acceptednn
 
 ## [1.1.1] - 2026-02-16nn### Addedn- added compactibility to more laravel versionsnn
