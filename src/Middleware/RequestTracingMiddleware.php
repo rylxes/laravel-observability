@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Collectors\DatabaseQueryCollector;
+use Rylxes\Observability\Collectors\ExceptionCollector;
 use Rylxes\Observability\Jobs\StoreTraceJob;
 use Rylxes\Observability\Events\NewTraceRecorded;
 
@@ -18,7 +19,8 @@ class RequestTracingMiddleware
     protected string $traceId;
 
     public function __construct(
-        protected DatabaseQueryCollector $queryCollector
+        protected DatabaseQueryCollector $queryCollector,
+        protected ExceptionCollector $exceptionCollector,
     ) {
     }
 
@@ -48,12 +50,69 @@ class RequestTracingMiddleware
         // Start query collection
         $this->queryCollector->start($this->traceId);
 
-        $response = $next($request);
+        try {
+            $response = $next($request);
+        } catch (\Throwable $e) {
+            $this->captureException($e, $request);
+            throw $e;
+        }
 
         // Record the trace
         $this->recordTrace($request, $response);
 
         return $response;
+    }
+
+    /**
+     * Capture an exception and record the failed trace.
+     */
+    protected function captureException(\Throwable $exception, Request $request): void
+    {
+        $duration = (microtime(true) - $this->startTime) * 1000;
+        $memoryUsage = memory_get_usage(true) - $this->startMemory;
+
+        // Get query statistics collected so far
+        $queryStats = $this->queryCollector->stop($this->traceId);
+
+        $trace = [
+            'trace_id' => $this->traceId,
+            'parent_trace_id' => $request->attributes->get('parent_trace_id'),
+            'route_name' => $request->route()?->getName(),
+            'route_action' => $request->route()?->getActionName(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'status_code' => 500,
+            'duration_ms' => round($duration, 2),
+            'memory_usage' => $memoryUsage,
+            'query_count' => $queryStats['count'] ?? 0,
+            'query_time_ms' => $queryStats['time_ms'] ?? 0,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'user_id' => auth()->id(),
+            'metadata' => [
+                'session_id' => $request->hasSession() ? $request->session()->getId() : null,
+                'referer' => $request->header('referer'),
+                'is_ajax' => $request->ajax(),
+                'is_json' => $request->expectsJson(),
+                'exception' => get_class($exception),
+            ],
+        ];
+
+        // Save the trace
+        if (config('observability.queue.enabled')) {
+            StoreTraceJob::dispatch($trace);
+        } else {
+            RequestTrace::create($trace);
+        }
+
+        // Capture the exception
+        $this->exceptionCollector->capture($exception, $this->traceId, [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'route' => $request->route()?->getName(),
+            'user_id' => auth()->id(),
+            'ip_address' => $request->ip(),
+        ]);
     }
 
     /**

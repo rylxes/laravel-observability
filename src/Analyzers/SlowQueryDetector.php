@@ -67,6 +67,16 @@ class SlowQueryDetector
         $recommendations = [];
 
         foreach ($slowQueries as $query) {
+            // Use EXPLAIN-based recommendations when available
+            if (!empty($query->explain_output)) {
+                $recommendations = array_merge(
+                    $recommendations,
+                    $this->generateExplainRecommendations($query)
+                );
+                continue;
+            }
+
+            // Fall back to pattern-based recommendations
             $sql = strtoupper($query->sql);
 
             // Check for missing WHERE clause
@@ -108,6 +118,69 @@ class SlowQueryDetector
 
         // Remove duplicates
         return array_values(array_unique($recommendations, SORT_REGULAR));
+    }
+
+    /**
+     * Generate recommendations from EXPLAIN output (evidence-based).
+     */
+    protected function generateExplainRecommendations($query): array
+    {
+        $explain = $query->explain_output;
+        $recommendations = [];
+
+        // Pull warnings and suggestions from EXPLAIN analysis
+        foreach ($explain['warnings'] ?? [] as $warning) {
+            $recommendations[] = [
+                'type' => 'explain_warning',
+                'message' => $warning,
+                'sql' => $query->sql,
+                'source' => 'explain',
+            ];
+        }
+
+        foreach ($explain['suggestions'] ?? [] as $suggestion) {
+            $recommendations[] = [
+                'type' => 'explain_suggestion',
+                'message' => $suggestion,
+                'sql' => $query->sql,
+                'source' => 'explain',
+            ];
+        }
+
+        // Add scan type recommendation
+        $scanType = $explain['scan_type'] ?? 'unknown';
+        $rowsExamined = $explain['rows_examined'] ?? 0;
+
+        if ($scanType === 'full_scan' && $rowsExamined > 1000) {
+            $recommendations[] = [
+                'type' => 'full_table_scan',
+                'message' => "Full table scan on \"{$query->table_name}\" examining {$rowsExamined} rows - add an index on filtered columns",
+                'sql' => $query->sql,
+                'source' => 'explain',
+            ];
+        }
+
+        // No index used but possible indexes exist
+        if (empty($explain['index_used']) && !empty($explain['possible_indexes'])) {
+            $indexes = implode(', ', $explain['possible_indexes']);
+            $recommendations[] = [
+                'type' => 'unused_index',
+                'message' => "Possible indexes [{$indexes}] exist but none used - review query structure or use index hints",
+                'sql' => $query->sql,
+                'source' => 'explain',
+            ];
+        }
+
+        // Still check for N+1 even with EXPLAIN
+        if ($query->is_duplicate) {
+            $recommendations[] = [
+                'type' => 'n_plus_one',
+                'message' => "Duplicate query detected - consider using eager loading",
+                'sql' => $query->sql,
+            ];
+        }
+
+        return $recommendations;
     }
 
     /**

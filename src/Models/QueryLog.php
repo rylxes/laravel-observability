@@ -11,6 +11,7 @@ class QueryLog extends Model
 
     protected $casts = [
         'bindings' => 'array',
+        'explain_output' => 'array',
         'duration_ms' => 'integer',
         'is_slow' => 'boolean',
         'is_duplicate' => 'boolean',
@@ -71,6 +72,14 @@ class QueryLog extends Model
     public function scopeTable($query, string $tableName)
     {
         return $query->where('table_name', $tableName);
+    }
+
+    /**
+     * Scope to filter queries with EXPLAIN output.
+     */
+    public function scopeWithExplain($query)
+    {
+        return $query->whereNotNull('explain_output');
     }
 
     /**

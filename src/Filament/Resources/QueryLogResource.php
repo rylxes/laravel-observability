@@ -60,6 +60,17 @@ class QueryLogResource extends Resource
                     ->label('Connection')
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                Tables\Columns\TextColumn::make('explain_output.scan_type')
+                    ->label('Scan')
+                    ->badge()
+                    ->color(fn (?string $state) => match ($state) {
+                        'const', 'ref' => 'success',
+                        'range_scan', 'index_scan' => 'warning',
+                        'full_scan' => 'danger',
+                        default => 'gray',
+                    })
+                    ->toggleable(isToggledHiddenByDefault: false),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Time')
                     ->dateTime()
@@ -82,6 +93,10 @@ class QueryLogResource extends Resource
                         'UPDATE' => 'UPDATE',
                         'DELETE' => 'DELETE',
                     ]),
+
+                Tables\Filters\Filter::make('has_explain')
+                    ->query(fn ($query) => $query->whereNotNull('explain_output'))
+                    ->label('Has EXPLAIN'),
             ]);
     }
 
@@ -108,6 +123,39 @@ class QueryLogResource extends Resource
                     ->schema([
                         Infolists\Components\TextEntry::make('trace_id')->copyable(),
                     ]),
+
+                Infolists\Components\Section::make('EXPLAIN Analysis')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('explain_output.scan_type')
+                            ->label('Scan Type')
+                            ->badge()
+                            ->color(fn (?string $state) => match ($state) {
+                                'const', 'ref' => 'success',
+                                'range_scan', 'index_scan' => 'warning',
+                                'full_scan' => 'danger',
+                                default => 'gray',
+                            }),
+                        Infolists\Components\TextEntry::make('explain_output.rows_examined')
+                            ->label('Rows Examined'),
+                        Infolists\Components\TextEntry::make('explain_output.index_used')
+                            ->label('Index Used')
+                            ->default('None'),
+                        Infolists\Components\TextEntry::make('explain_output.warnings')
+                            ->label('Warnings')
+                            ->formatStateUsing(fn ($state) => is_array($state) ? implode("\n", $state) : ($state ?? 'None'))
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('explain_output.suggestions')
+                            ->label('Suggestions')
+                            ->formatStateUsing(fn ($state) => is_array($state) ? implode("\n", $state) : ($state ?? 'None'))
+                            ->columnSpanFull(),
+                        Infolists\Components\TextEntry::make('explain_output.raw_output')
+                            ->label('Raw EXPLAIN Output')
+                            ->formatStateUsing(fn ($state) => is_array($state) ? json_encode($state, JSON_PRETTY_PRINT) : 'N/A')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3)
+                    ->collapsible()
+                    ->visible(fn (QueryLog $record) => !empty($record->explain_output)),
 
                 Infolists\Components\Section::make('Stack Trace')
                     ->schema([

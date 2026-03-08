@@ -99,6 +99,15 @@ return [
 
         // Maximum number of queries to log per request
         'max_queries_per_request' => env('OBSERVABILITY_MAX_QUERIES_PER_REQUEST', 500),
+
+        // Run EXPLAIN on slow SELECT queries to capture execution plans
+        'capture_explain' => env('OBSERVABILITY_CAPTURE_EXPLAIN', true),
+
+        // Timeout for EXPLAIN execution (in seconds)
+        'explain_timeout' => env('OBSERVABILITY_EXPLAIN_TIMEOUT', 5),
+
+        // Only run EXPLAIN on SELECT queries (recommended)
+        'explain_only_select' => true,
     ],
 
     /*
@@ -151,6 +160,39 @@ return [
             'error_rate',
             'query_time',
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exception Tracking
+    |--------------------------------------------------------------------------
+    |
+    | Configure exception capture and grouping behavior.
+    |
+    */
+    'exceptions' => [
+        'enabled' => env('OBSERVABILITY_EXCEPTIONS_ENABLED', true),
+
+        // Capture full stack trace for exceptions
+        'capture_stack_trace' => true,
+
+        // Maximum stack trace depth to capture
+        'max_stack_trace_depth' => 20,
+
+        // Exception classes to ignore (not tracked)
+        'ignored_exceptions' => [
+            \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class,
+            \Illuminate\Auth\AuthenticationException::class,
+        ],
+
+        // Grouping strategy: 'class_file_line' or 'class_message'
+        'group_by' => 'class_file_line',
+
+        // Create alert when a new exception class is first seen
+        'alert_on_new' => true,
+
+        // Alert if an exception group exceeds this many occurrences in 1 hour
+        'alert_frequency_threshold' => 10,
     ],
 
     /*
@@ -241,6 +283,7 @@ return [
         'queries_days' => env('OBSERVABILITY_RETENTION_QUERIES_DAYS', 7),
         'metrics_days' => env('OBSERVABILITY_RETENTION_METRICS_DAYS', 30),
         'alerts_days' => env('OBSERVABILITY_RETENTION_ALERTS_DAYS', 30),
+        'exceptions_days' => env('OBSERVABILITY_RETENTION_EXCEPTIONS_DAYS', 30),
     ],
 
     /*
@@ -309,6 +352,28 @@ return [
     'broadcasting' => [
         'enabled' => env('OBSERVABILITY_BROADCASTING_ENABLED', false),
         'channel' => env('OBSERVABILITY_BROADCAST_CHANNEL', 'observability'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Deployment Markers
+    |--------------------------------------------------------------------------
+    |
+    | Track deployments and correlate them with performance changes.
+    | Use `php artisan observability:deploy` or the API to record markers.
+    |
+    */
+    'deployments' => [
+        'enabled' => env('OBSERVABILITY_DEPLOYMENTS_ENABLED', true),
+
+        // Auto-detect git commit hash and branch
+        'auto_detect_git' => true,
+
+        // Reset anomaly detection baseline after a deployment
+        'reset_baseline_on_deploy' => false,
+
+        // Hours before/after deployment to compare for impact analysis
+        'impact_window_hours' => env('OBSERVABILITY_DEPLOY_IMPACT_WINDOW', 1),
     ],
 
 ];

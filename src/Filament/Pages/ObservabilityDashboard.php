@@ -8,6 +8,8 @@ use Rylxes\Observability\Filament\Widgets\AlertSummaryWidget;
 use Rylxes\Observability\Filament\Widgets\ResponseTimeChartWidget;
 use Rylxes\Observability\Filament\Widgets\RecentTracesWidget;
 use Rylxes\Observability\Filament\Widgets\SlowQueriesWidget;
+use Rylxes\Observability\Filament\Widgets\ExceptionSummaryWidget;
+use Rylxes\Observability\Filament\Widgets\DeploymentTimelineWidget;
 
 class ObservabilityDashboard extends Dashboard
 {
@@ -31,6 +33,8 @@ class ObservabilityDashboard extends Dashboard
             ResponseTimeChartWidget::class,
             RecentTracesWidget::class,
             SlowQueriesWidget::class,
+            ExceptionSummaryWidget::class,
+            DeploymentTimelineWidget::class,
         ];
     }
 

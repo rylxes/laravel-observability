@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Rylxes\Observability\Models\QueryLog;
 use Rylxes\Observability\Jobs\StoreQueryLogJob;
+use Rylxes\Observability\Analyzers\ExplainAnalyzer;
 
 class DatabaseQueryCollector
 {
@@ -134,6 +135,23 @@ class DatabaseQueryCollector
             // Capture stack trace for slow queries
             if ($query['is_slow'] && config('observability.queries.capture_stack_trace')) {
                 $data['stack_trace'] = $this->captureStackTrace();
+            }
+
+            // Run EXPLAIN for slow queries
+            if ($query['is_slow'] && config('observability.queries.capture_explain', true)) {
+                try {
+                    $explainAnalyzer = app(ExplainAnalyzer::class);
+                    $explainOutput = $explainAnalyzer->explain(
+                        $query['sql'],
+                        $query['bindings'],
+                        $query['connection']
+                    );
+                    if ($explainOutput) {
+                        $data['explain_output'] = $explainOutput;
+                    }
+                } catch (\Throwable $e) {
+                    // Silently fail - EXPLAIN should never break the request
+                }
             }
 
             // Save to database or queue

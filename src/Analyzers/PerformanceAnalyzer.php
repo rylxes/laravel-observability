@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Models\PerformanceMetric;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Models\Deployment;
 use Rylxes\Observability\Events\PerformanceThresholdExceeded;
 
 class PerformanceAnalyzer
@@ -128,13 +129,20 @@ class PerformanceAnalyzer
      */
     protected function getPerformanceTrends(int $days): array
     {
+        $driver = RequestTrace::query()->getConnection()->getDriverName();
+        $hourExpression = match ($driver) {
+            'sqlite' => "strftime('%Y-%m-%d %H:00:00', created_at)",
+            'pgsql' => "to_char(created_at, 'YYYY-MM-DD HH24:00:00')",
+            default => "DATE_FORMAT(created_at, '%Y-%m-%d %H:00:00')",
+        };
+
         $hourlyStats = RequestTrace::where('created_at', '>=', now()->subDays($days))
-            ->selectRaw('
-                DATE_FORMAT(created_at, "%Y-%m-%d %H:00:00") as hour,
+            ->selectRaw("
+                {$hourExpression} as hour,
                 COUNT(*) as requests,
                 AVG(duration_ms) as avg_duration,
                 SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as errors
-            ')
+            ")
             ->groupBy('hour')
             ->orderBy('hour')
             ->get()
@@ -238,6 +246,31 @@ class PerformanceAnalyzer
         $index = max(0, min($index, count($values) - 1));
 
         return round($values[$index], 2);
+    }
+
+    /**
+     * Get deployment impact analysis.
+     */
+    public function getDeploymentImpact(Deployment $deployment): array
+    {
+        return $deployment->performanceImpact();
+    }
+
+    /**
+     * Get recent deployments with their performance impact.
+     */
+    public function getDeploymentsWithImpact(int $limit = 10): array
+    {
+        return Deployment::orderBy('deployed_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function (Deployment $deployment) {
+                return [
+                    'deployment' => $deployment->toArray(),
+                    'impact' => $deployment->performanceImpact(),
+                ];
+            })
+            ->toArray();
     }
 
     /**

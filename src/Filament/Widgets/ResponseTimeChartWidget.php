@@ -18,12 +18,19 @@ class ResponseTimeChartWidget extends ChartWidget
 
     protected function getData(): array
     {
+        $driver = RequestTrace::query()->getConnection()->getDriverName();
+        $hourExpression = match ($driver) {
+            'sqlite' => "strftime('%Y-%m-%d %H:00', created_at)",
+            'pgsql' => "to_char(created_at, 'YYYY-MM-DD HH24:00')",
+            default => "DATE_FORMAT(created_at, '%Y-%m-%d %H:00')",
+        };
+
         $traces = RequestTrace::where('created_at', '>=', now()->subDay())
-            ->selectRaw('
-                DATE_FORMAT(created_at, "%Y-%m-%d %H:00") as hour,
+            ->selectRaw("
+                {$hourExpression} as hour,
                 AVG(duration_ms) as avg_duration,
                 MAX(duration_ms) as max_duration
-            ')
+            ")
             ->groupBy('hour')
             ->orderBy('hour')
             ->get();

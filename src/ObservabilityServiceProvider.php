@@ -8,6 +8,7 @@ use Rylxes\Observability\Middleware\RequestTracingMiddleware;
 use Rylxes\Observability\Console\Commands\InstallCommand;
 use Rylxes\Observability\Console\Commands\PruneMetricsCommand;
 use Rylxes\Observability\Console\Commands\AnalyzePerformanceCommand;
+use Rylxes\Observability\Console\Commands\DeploymentMarkerCommand;
 use Rylxes\Observability\Collectors\DatabaseQueryCollector;
 use Rylxes\Observability\Analyzers\SlowQueryDetector;
 use Rylxes\Observability\Analyzers\PerformanceAnalyzer;
@@ -15,6 +16,8 @@ use Rylxes\Observability\Analyzers\AnomalyDetector;
 use Rylxes\Observability\Exporters\PrometheusExporter;
 use Rylxes\Observability\Notifications\SlackNotifier;
 use Rylxes\Observability\Notifications\TelegramNotifier;
+use Rylxes\Observability\Collectors\ExceptionCollector;
+use Rylxes\Observability\Analyzers\ExplainAnalyzer;
 
 class ObservabilityServiceProvider extends ServiceProvider
 {
@@ -37,6 +40,8 @@ class ObservabilityServiceProvider extends ServiceProvider
         $this->app->singleton(PrometheusExporter::class);
         $this->app->singleton(SlackNotifier::class);
         $this->app->singleton(TelegramNotifier::class);
+        $this->app->singleton(ExceptionCollector::class);
+        $this->app->singleton(ExplainAnalyzer::class);
 
         // Register facade accessor
         $this->app->singleton('observability', function ($app) {
@@ -83,6 +88,7 @@ class ObservabilityServiceProvider extends ServiceProvider
                 InstallCommand::class,
                 PruneMetricsCommand::class,
                 AnalyzePerformanceCommand::class,
+                DeploymentMarkerCommand::class,
             ]);
         }
 
@@ -143,6 +149,8 @@ class ObservabilityServiceProvider extends ServiceProvider
             PrometheusExporter::class,
             SlackNotifier::class,
             TelegramNotifier::class,
+            ExceptionCollector::class,
+            ExplainAnalyzer::class,
         ];
     }
 }

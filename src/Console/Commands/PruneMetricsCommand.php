@@ -7,6 +7,7 @@ use Rylxes\Observability\Models\RequestTrace;
 use Rylxes\Observability\Models\QueryLog;
 use Rylxes\Observability\Models\PerformanceMetric;
 use Rylxes\Observability\Models\Alert;
+use Rylxes\Observability\Models\ExceptionLog;
 
 class PruneMetricsCommand extends Command
 {
@@ -40,6 +41,11 @@ class PruneMetricsCommand extends Command
         $alertsDays = config('observability.retention.alerts_days', 30);
         $alertsDeleted = Alert::where('created_at', '<', now()->subDays($alertsDays))->delete();
         $this->info("✓ Deleted {$alertsDeleted} old alerts (>{$alertsDays} days)");
+
+        // Prune exceptions
+        $exceptionsDays = config('observability.retention.exceptions_days', 30);
+        $exceptionsDeleted = ExceptionLog::where('created_at', '<', now()->subDays($exceptionsDays))->delete();
+        $this->info("✓ Deleted {$exceptionsDeleted} old exceptions (>{$exceptionsDays} days)");
 
         $this->info('✓ Pruning complete!');
 
