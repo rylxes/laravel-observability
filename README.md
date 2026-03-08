@@ -1,5 +1,7 @@
 # Laravel Observability Plugin
 
+> **[Full Documentation](https://rylxes.com/docs/laravel-observability)** — Complete usage guide, configuration reference, and API docs.
+
 🔍 **Production-Grade Observability & APM for Laravel Applications**
 
 A lightweight, database-agnostic alternative to full APM tools, optimized specifically for Laravel apps. Features request tracing, performance profiling, slow query detection, OpenTelemetry/Prometheus integration, AI-based anomaly detection, and smart alerting.
